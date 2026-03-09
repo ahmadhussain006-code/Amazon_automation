@@ -1,39 +1,34 @@
-name: Amazon Automation Test
+name: Cross Browser Automation Test
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  playwright-test:
+  playwright-tests:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
           pip install pytest
-          pip install playwright
           pip install pytest-html
+          pip install playwright
           python -m playwright install
 
-      - name: Run Playwright Tests and Generate HTML Report
+      - name: Run Tests on Browser
         run: |
-          pytest --html=report.html --self-contained-html
-
-      - name: Upload Test Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: pytest-report
-          path: report.html
+          pytest --browser ${{ matrix.browser }} --html=report-${{ matrix.browser }}.html --self-contained-html
