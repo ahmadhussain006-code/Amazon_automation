@@ -1,38 +1,41 @@
-name: Amazon Automation Test
+stages:
+  - test
 
-on:
-  push:
-    branches:
-      - main
+image: python:3.10
 
-jobs:
-  playwright-test:
-    runs-on: ubuntu-latest
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+before_script:
+  - python --version
+  - pip install --upgrade pip
+  - pip install pytest playwright pytest-html
+  - python -m playwright install --with-deps
+  - mkdir reports
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
+chromium_test:
+  stage: test
+  script:
+    - pytest --browser chromium --html=reports/report-chromium.html --self-contained-html
+  artifacts:
+    when: always
+    paths:
+      - reports/report-chromium.html
 
-      - name: Install dependencies
-        run: |
-          pip install pytest
-          pip install playwright
-          pip install pytest-html
+firefox_test:
+  stage: test
+  script:
+    - pytest --browser firefox --html=reports/report-firefox.html --self-contained-html
+  artifacts:
+    when: always
+    paths:
+      - reports/report-firefox.html
 
-      - name: Install Playwright Browsers & Dependencies
-        run: |
-          python -m playwright install --with-deps
-
-      - name: Run Chromium Test
-        run: pytest --browser chromium --html=report-chromium.html --self-contained-html
-
-      - name: Run Firefox Test
-        run: pytest --browser firefox --html=report-firefox.html --self-contained-html
-
-      - name: Run WebKit Test
-        run: pytest --browser webkit --html=report-webkit.html --self-contained-html
+webkit_test:
+  stage: test
+  script:
+    - pytest --browser webkit --html=reports/report-webkit.html --self-contained-html
+  artifacts:
+    when: always
+    paths:
+      - reports/report-webkit.html
