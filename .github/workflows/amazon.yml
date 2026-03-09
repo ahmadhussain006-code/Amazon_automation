@@ -1,0 +1,39 @@
+name: Amazon Automation Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  playwright-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install pytest
+          pip install playwright
+          pip install pytest-html
+          python -m playwright install
+
+      - name: Run Playwright Tests and Generate HTML Report
+        run: |
+          pytest --html=report.html --self-contained-html
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-report
+          path: report.html
