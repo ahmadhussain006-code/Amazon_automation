@@ -10,9 +10,9 @@ def test_demo(request):
 
         # Cross browser launch
         if browser_name == "chromium":
-            browser = p.chromium.launch(headless=False)
+            browser = p.chromium.launch(headless=True)
         elif browser_name == "firefox":
-            browser = p.firefox.launch(headless=False)
+            browser = p.firefox.launch(headless=True)
         else:
             browser = p.webkit.launch(headless=True)
 

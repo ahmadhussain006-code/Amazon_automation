@@ -1,41 +1,45 @@
-stages:
-  - test
+name: Playwright Automation Test
 
-image: python:3.10
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+jobs:
+  test:
+    runs-on: ubuntu-latest
 
-before_script:
-  - python --version
-  - pip install --upgrade pip
-  - pip install pytest playwright pytest-html
-  - python -m playwright install --with-deps
-  - mkdir reports
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-chromium_test:
-  stage: test
-  script:
-    - pytest --browser chromium --html=reports/report-chromium.html --self-contained-html
-  artifacts:
-    when: always
-    paths:
-      - reports/report-chromium.html
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
-firefox_test:
-  stage: test
-  script:
-    - pytest --browser firefox --html=reports/report-firefox.html --self-contained-html
-  artifacts:
-    when: always
-    paths:
-      - reports/report-firefox.html
+      - name: Install Dependencies
+        run: |
+          pip install pytest playwright pytest-html
+          python -m playwright install --with-deps
 
-webkit_test:
-  stage: test
-  script:
-    - pytest --browser webkit --html=reports/report-webkit.html --self-contained-html
-  artifacts:
-    when: always
-    paths:
-      - reports/report-webkit.html
+      - name: Run Chromium Test
+        run: pytest --browser chromium --html=report-chromium.html --self-contained-html
+
+      - name: Run Firefox Test
+        run: pytest --browser firefox --html=report-firefox.html --self-contained-html
+
+      - name: Run WebKit Test
+        run: pytest --browser webkit --html=report-webkit.html --self-contained-html
+
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            report-chromium.html
+            report-firefox.html
+            report-webkit.html
