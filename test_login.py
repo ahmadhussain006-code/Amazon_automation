@@ -10,7 +10,7 @@ def test_login(request):
 
         # Cross-browser launch
         if browser_name == "chromium":
-            browser = p.chromium.launch(headless=False, args=["--start-maximized"])
+            browser = p.chromium.launch(headless=True, args=["--start-maximized"])
 
         elif browser_name == "firefox":
             browser = p.firefox.launch(headless=True, args=["--start-maximized"])
